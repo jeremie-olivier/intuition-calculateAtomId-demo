@@ -1,5 +1,4 @@
 import { calculateAtomId, calculateTripleId } from '@0xintuition/sdk'
-import { stringToHex } from 'viem'
 
 async function testCalculateAtomId() {
   console.log('🧪 Testing calculateAtomId using Intuition SDK')
@@ -23,11 +22,8 @@ async function testCalculateAtomId() {
 
   for (const atomData of testCases) {
     try {
-      // Convert string to hex bytes as expected by calculateAtomId
-      const hexData = stringToHex(atomData)
-
-      // Use SDK's calculateAtomId function with hex-encoded data
-      const atomId = await calculateAtomId(hexData)
+      // Use SDK's calculateAtomId function directly with raw string
+      const atomId = await calculateAtomId(atomData)
 
       // Determine the type for display
       let type = 'Text'
@@ -39,7 +35,6 @@ async function testCalculateAtomId() {
 
       console.log(`📋 ${type}:`)
       console.log(`   Input: "${atomData}"`)
-      console.log(`   Hex:   ${hexData}`)
       console.log(`   ID:    ${atomId}`)
       console.log()
     } catch (error) {
@@ -53,12 +48,10 @@ async function testCalculateAtomId() {
   const testData = 'test-atom-consistency'
 
   try {
-    const hexData = stringToHex(testData)
-    const id1 = await calculateAtomId(hexData)
-    const id2 = await calculateAtomId(hexData)
+    const id1 = await calculateAtomId(testData)
+    const id2 = await calculateAtomId(testData)
 
     console.log(`Input: "${testData}"`)
-    console.log(`Hex:   ${hexData}`)
     console.log(`First call:  ${id1}`)
     console.log(`Second call: ${id2}`)
     console.log(`Match: ${id1 === id2 ? '✅' : '❌'}`)
@@ -80,8 +73,7 @@ async function testCalculateAtomId() {
 
   for (const atomData of additionalTests) {
     try {
-      const hexData = stringToHex(atomData)
-      const atomId = await calculateAtomId(hexData)
+      const atomId = await calculateAtomId(atomData)
       let type = 'Text'
       if (/^\d+$/.test(atomData)) type = 'Numeric String'
       else if (atomData.includes('🚀')) type = 'Unicode'
@@ -99,10 +91,10 @@ async function testCalculateAtomId() {
   // Bonus: Test calculateTripleId if available
   console.log('🔗 Testing calculateTripleId (bonus):')
   try {
-    // Create some test atoms first (encode to hex)
-    const subjectId = await calculateAtomId(stringToHex('Alice'))
-    const predicateId = await calculateAtomId(stringToHex('trusts'))
-    const objectId = await calculateAtomId(stringToHex('Bob'))
+    // Create some test atoms first
+    const subjectId = await calculateAtomId('Alice')
+    const predicateId = await calculateAtomId('trusts')
+    const objectId = await calculateAtomId('Bob')
 
     const tripleId = await calculateTripleId(subjectId, predicateId, objectId)
 

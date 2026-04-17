@@ -37,17 +37,18 @@ This demo uses the **official Intuition SDK** to test the `calculateAtomId` func
 
 ```typescript
 import { calculateAtomId } from '@0xintuition/sdk'
+import { stringToHex } from 'viem'
 
-// Calculate atom ID from any string
-const atomId = await calculateAtomId('your-concept-here')
+// calculateAtomId expects hex-encoded bytes, not plain strings
+const atomId = await calculateAtomId(stringToHex('your-concept-here'))
 console.log(atomId) // 0x...
 
-// Works with any string format:
-await calculateAtomId('ipfs://bafybeigdyrzt...')           // IPFS URI
-await calculateAtomId('caip10:eip155:1:0x1234...')         // CAIP-10 address
-await calculateAtomId('Alice')                             // Simple text
-await calculateAtomId('https://example.com')              // URL
-await calculateAtomId('@username')                         // Handle
+// Convert strings to hex first:
+await calculateAtomId(stringToHex('ipfs://bafybeigdyrzt...'))    // IPFS URI
+await calculateAtomId(stringToHex('caip10:eip155:1:0x1234...')) // CAIP-10 address
+await calculateAtomId(stringToHex('Alice'))                      // Simple text
+await calculateAtomId(stringToHex('https://example.com'))       // URL
+await calculateAtomId(stringToHex('@username'))                  // Handle
 ```
 
 ## Networks
