@@ -1,0 +1,19 @@
+{
+  "name": "test-calculate-atom-id",
+  "version": "1.0.0",
+  "description": "Test script for Intuition SDK calculateAtomId function",
+  "main": "test-calculate-atom-id.ts",
+  "scripts": {
+    "test": "tsx test-calculate-atom-id.ts",
+    "dev": "tsx test-calculate-atom-id.ts"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  },
+  "type": "module"
+}
