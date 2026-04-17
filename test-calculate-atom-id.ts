@@ -6,55 +6,39 @@ async function testCalculateAtomId() {
   console.log('🎯 Function: calculateAtomId (direct import)')
   console.log()
 
-  // Test cases
+  // Test cases - just raw strings as expected by calculateAtomId
   const testCases = [
-    {
-      name: 'IPFS URI',
-      data: 'ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi'
-    },
-    {
-      name: 'Ethereum Address (CAIP-10)',
-      data: 'caip10:eip155:1:0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
-    },
-    {
-      name: 'Simple Text Concept',
-      data: 'AI Agent Framework'
-    },
-    {
-      name: 'Predicate',
-      data: 'implements'
-    },
-    {
-      name: 'User Handle',
-      data: '@alice'
-    },
-    {
-      name: 'Custom Label',
-      data: 'TypeScript Developer'
-    },
-    {
-      name: 'URL',
-      data: 'https://github.com/0xintuition/intuition-ts'
-    },
-    {
-      name: 'Email',
-      data: 'alice@example.com'
-    }
+    'ipfs://bafkreifqptyn7vjtw3mywn3uyr33kadlpfmxkafw47xsz6i34z5pywjueq',
+    'caip10:eip155:1:0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+    'AI Agent Framework',
+    'implements',
+    '@alice',
+    'TypeScript Developer',
+    'https://github.com/0xintuition/intuition-ts',
+    'alice@example.com'
   ]
 
   console.log('🔍 Testing calculateAtomId with different inputs:\n')
 
-  for (const testCase of testCases) {
+  for (const atomData of testCases) {
     try {
-      // Use SDK's calculateAtomId function directly
-      const atomId = await calculateAtomId(testCase.data)
+      // Use SDK's calculateAtomId function directly with raw string
+      const atomId = await calculateAtomId(atomData)
 
-      console.log(`📋 ${testCase.name}:`)
-      console.log(`   Input: "${testCase.data}"`)
+      // Determine the type for display
+      let type = 'Text'
+      if (atomData.startsWith('ipfs://')) type = 'IPFS URI'
+      else if (atomData.startsWith('caip10:')) type = 'CAIP-10 Address'
+      else if (atomData.startsWith('https://')) type = 'URL'
+      else if (atomData.includes('@') && atomData.includes('.')) type = 'Email'
+      else if (atomData.startsWith('@')) type = 'Handle'
+
+      console.log(`📋 ${type}:`)
+      console.log(`   Input: "${atomData}"`)
       console.log(`   ID:    ${atomId}`)
       console.log()
     } catch (error) {
-      console.error(`❌ Error calculating atom ID for "${testCase.data}":`, error)
+      console.error(`❌ Error calculating atom ID for "${atomData}":`, error)
       console.log()
     }
   }
@@ -81,18 +65,24 @@ async function testCalculateAtomId() {
   console.log('🛠️  Testing additional atom types:')
 
   const additionalTests = [
-    { name: 'Numeric String', data: '12345' },
-    { name: 'Special Characters', data: 'hello@world#2024' },
-    { name: 'Unicode', data: '🚀 Space Mission' },
-    { name: 'JSON-like', data: '{"type": "concept", "value": "test"}' }
+    '12345',
+    'hello@world#2024',
+    '🚀 Space Mission',
+    '{"type": "concept", "value": "test"}'
   ]
 
-  for (const test of additionalTests) {
+  for (const atomData of additionalTests) {
     try {
-      const atomId = await calculateAtomId(test.data)
-      console.log(`✅ ${test.name}: "${test.data}" → ${atomId.slice(0, 10)}...`)
+      const atomId = await calculateAtomId(atomData)
+      let type = 'Text'
+      if (/^\d+$/.test(atomData)) type = 'Numeric String'
+      else if (atomData.includes('🚀')) type = 'Unicode'
+      else if (atomData.includes('#')) type = 'Special Characters'
+      else if (atomData.startsWith('{')) type = 'JSON-like'
+
+      console.log(`✅ ${type}: "${atomData}" → ${atomId.slice(0, 10)}...`)
     } catch (error) {
-      console.error(`❌ ${test.name}: Error with "${test.data}"`)
+      console.error(`❌ Error with "${atomData}"`)
     }
   }
 

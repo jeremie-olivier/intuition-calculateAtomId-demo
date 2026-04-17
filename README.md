@@ -36,16 +36,18 @@ This demo uses the **official Intuition SDK** to test the `calculateAtomId` func
 ## SDK Usage
 
 ```typescript
-import { IntuitionSDK } from '@0xintuition/sdk'
+import { calculateAtomId } from '@0xintuition/sdk'
 
-// Initialize SDK
-const sdk = new IntuitionSDK({
-  network: 'testnet' // or 'mainnet'
-})
-
-// Calculate atom ID
-const atomId = await sdk.calculateAtomId('your-concept-here')
+// Calculate atom ID from any string
+const atomId = await calculateAtomId('your-concept-here')
 console.log(atomId) // 0x...
+
+// Works with any string format:
+await calculateAtomId('ipfs://bafybeigdyrzt...')           // IPFS URI
+await calculateAtomId('caip10:eip155:1:0x1234...')         // CAIP-10 address
+await calculateAtomId('Alice')                             // Simple text
+await calculateAtomId('https://example.com')              // URL
+await calculateAtomId('@username')                         // Handle
 ```
 
 ## Networks
