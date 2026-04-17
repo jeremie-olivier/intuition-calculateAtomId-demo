@@ -1,65 +1,105 @@
-# Intuition SDK calculateAtomId Demo
+# Intuition SDK Type Signature Issue Demo
 
-A simple TypeScript script demonstrating the `calculateAtomId` function from the official [Intuition SDK](https://www.npmjs.com/package/@0xintuition/sdk).
+🎯 **Purpose:** Demonstrate that `calculateAtomId` should accept `string | Hex` instead of just `Hex`
 
-## Setup
+This repository provides evidence for a PR to fix the type signature mismatch in the [Intuition SDK](https://www.npmjs.com/package/@0xintuition/sdk).
+
+## The Problem
+
+**Current type signature:**
+```typescript
+function calculateAtomId(atomData: Hex): string
+```
+
+**Runtime behavior:**
+```typescript
+// Both work identically at runtime:
+calculateAtomId('Alice')                    // ✅ Works but TypeScript errors
+calculateAtomId(stringToHex('Alice'))      // ✅ Works, TypeScript happy
+// → Same result: 0x05bb6d28ed5ca3c5206f33f5818da27b3b0bbf6401cd40f082e8db7fcf481787
+```
+
+**The issue:** Types don't match runtime behavior!
+
+## Run the Demo
 
 ```bash
 npm install
-```
-
-## Run
-
-```bash
 npm test
 ```
 
-## What it does
+## What This Demo Proves
 
-This demo uses the **official Intuition SDK** to test the `calculateAtomId` function with various input types:
+✅ **Runtime accepts both formats:** String and hex inputs both work  
+✅ **Identical results:** Both approaches produce the same atom IDs  
+✅ **Internal conversion:** SDK handles string-to-hex conversion automatically  
+✅ **Edge cases work:** Unicode, JSON objects, long strings all handled  
+❌ **Unnecessary friction:** Current types force verbose `stringToHex()` calls  
 
-- **IPFS URIs** - For rich metadata atoms (most common)
-- **CAIP-10 addresses** - For blockchain addresses  
-- **Text concepts** - Simple string-based atoms
-- **Predicates** - Relationship labels
-- **User handles** - Social identifiers
-- **Custom labels** - Any arbitrary concept
+## Proposed Solution
 
-## Key Features
-
-✅ **Uses Official SDK**: Leverages `@0xintuition/sdk` package  
-✅ **Simple API**: Just call `sdk.calculateAtomId(data)`  
-✅ **Deterministic**: Same input always produces same ID  
-✅ **Network Support**: Works with both mainnet and testnet  
-✅ **Type Safety**: Full TypeScript support  
-
-## SDK Usage
+**Update the type signature to match runtime behavior:**
 
 ```typescript
-import { calculateAtomId } from '@0xintuition/sdk'
-import { stringToHex } from 'viem'
+// Current (restrictive)
+function calculateAtomId(atomData: Hex): string
 
-// calculateAtomId expects hex-encoded bytes, not plain strings
-const atomId = await calculateAtomId(stringToHex('your-concept-here'))
-console.log(atomId) // 0x...
-
-// Convert strings to hex first:
-await calculateAtomId(stringToHex('ipfs://bafybeigdyrzt...'))    // IPFS URI
-await calculateAtomId(stringToHex('caip10:eip155:1:0x1234...')) // CAIP-10 address
-await calculateAtomId(stringToHex('Alice'))                      // Simple text
-await calculateAtomId(stringToHex('https://example.com'))       // URL
-await calculateAtomId(stringToHex('@username'))                  // Handle
+// Proposed (matches reality)  
+function calculateAtomId(atomData: string | Hex): string
 ```
 
-## Networks
+## Developer Experience Impact
 
-The script defaults to **testnet**. To use mainnet, change the network in the script:
+**Current (unnecessarily verbose):**
+```typescript
+calculateAtomId(stringToHex('Alice'))
+calculateAtomId(stringToHex('ipfs://bafyrei...'))
+calculateAtomId(stringToHex(JSON.stringify(metadata)))
+```
+
+**With proposed fix (clean and intuitive):**
+```typescript
+calculateAtomId('Alice')
+calculateAtomId('ipfs://bafyrei...')
+calculateAtomId(JSON.stringify(metadata))
+calculateAtomId(existingHexData)  // Still works!
+```
+
+## Benefits of the Fix
+
+- ✅ **Types match runtime behavior** - No more lying types
+- ✅ **Better developer experience** - Less boilerplate
+- ✅ **Backward compatible** - Existing hex usage still works  
+- ✅ **More approachable** - Lower barrier to entry
+- ✅ **Follows web3 best practices** - Like ethers.js and viem patterns
+
+## Algorithm Reference
+
+The `calculateAtomId` function implements:
 
 ```typescript
-const sdk = new IntuitionSDK({
-  network: 'mainnet'
-})
+function calculateAtomId(atomData: Hex) {
+  const salt = keccak256(toHex('ATOM_SALT'))
+  return keccak256(
+    encodePacked(['bytes32', 'bytes'], [salt, keccak256(atomData)])
+  )
+}
 ```
+
+1. Create salt from `'ATOM_SALT'` string
+2. Hash the input atom data  
+3. Pack salt + hashed data
+4. Hash the packed result = final atom ID
+
+## Files in This Repo
+
+- **`test-calculate-atom-id.ts`** - Main demonstration of the typing issue
+- **`test-comparison.ts`** - Side-by-side string vs hex comparison  
+- **`test-json-simple.ts`** - JSON object handling demonstration
+
+## Ready for PR
+
+This demo provides comprehensive evidence that the type signature should be updated to `string | Hex` for better developer experience while maintaining full backward compatibility.
 
 ## Learn More
 
