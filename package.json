@@ -8,7 +8,7 @@
     "dev": "tsx test-calculate-atom-id.ts"
   },
   "dependencies": {
-    "viem": "^2.21.0"
+    "@0xintuition/sdk": "^2.0.2"
   },
   "devDependencies": {
     "tsx": "^4.19.0",

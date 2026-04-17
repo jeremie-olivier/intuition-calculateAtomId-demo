@@ -1,6 +1,6 @@
-# Test calculateAtomId Function
+# Intuition SDK calculateAtomId Demo
 
-A simple TypeScript script to test the `calculateAtomId` function from the Intuition Protocol.
+A simple TypeScript script demonstrating the `calculateAtomId` function from the official [Intuition SDK](https://www.npmjs.com/package/@0xintuition/sdk).
 
 ## Setup
 
@@ -16,28 +16,50 @@ npm test
 
 ## What it does
 
-The script tests the `calculateAtomId` function with various input types:
+This demo uses the **official Intuition SDK** to test the `calculateAtomId` function with various input types:
 
 - **IPFS URIs** - For rich metadata atoms (most common)
 - **CAIP-10 addresses** - For blockchain addresses  
 - **Text concepts** - Simple string-based atoms
 - **Predicates** - Relationship labels
 - **User handles** - Social identifiers
+- **Custom labels** - Any arbitrary concept
 
-The function takes arbitrary bytes data and returns a deterministic `bytes32` ID for each atom.
+## Key Features
 
-## Key Points
+✅ **Uses Official SDK**: Leverages `@0xintuition/sdk` package  
+✅ **Simple API**: Just call `sdk.calculateAtomId(data)`  
+✅ **Deterministic**: Same input always produces same ID  
+✅ **Network Support**: Works with both mainnet and testnet  
+✅ **Type Safety**: Full TypeScript support  
 
-- **Deterministic**: Same input always produces same ID
-- **Pure function**: No state changes, can be called off-chain
-- **Hex encoding**: String inputs must be converted to hex bytes first
-- **Network agnostic**: Function works on both mainnet and testnet
+## SDK Usage
+
+```typescript
+import { IntuitionSDK } from '@0xintuition/sdk'
+
+// Initialize SDK
+const sdk = new IntuitionSDK({
+  network: 'testnet' // or 'mainnet'
+})
+
+// Calculate atom ID
+const atomId = await sdk.calculateAtomId('your-concept-here')
+console.log(atomId) // 0x...
+```
 
 ## Networks
 
-The script defaults to **Intuition Testnet** (chain 13579). To use mainnet, change the variables in the script:
+The script defaults to **testnet**. To use mainnet, change the network in the script:
 
 ```typescript
-const chain = intuitionMainnet
-const multivaultAddress = MULTIVAULT_MAINNET
+const sdk = new IntuitionSDK({
+  network: 'mainnet'
+})
 ```
+
+## Learn More
+
+- [Intuition SDK on npm](https://www.npmjs.com/package/@0xintuition/sdk)
+- [Intuition Protocol Documentation](https://docs.intuition.systems)
+- [GitHub Repository](https://github.com/0xIntuition/intuition-ts)

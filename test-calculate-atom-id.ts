@@ -1,50 +1,10 @@
-import { createPublicClient, http, parseAbi, stringToHex } from 'viem'
-import { defineChain } from 'viem'
-
-// Define Intuition networks
-const intuitionMainnet = defineChain({
-  id: 1155,
-  name: 'Intuition',
-  nativeCurrency: { decimals: 18, name: 'Intuition', symbol: 'TRUST' },
-  rpcUrls: { default: { http: ['https://rpc.intuition.systems/http'] } },
-  blockExplorers: {
-    default: { name: 'Intuition Explorer', url: 'https://explorer.intuition.systems' }
-  },
-})
-
-const intuitionTestnet = defineChain({
-  id: 13579,
-  name: 'Intuition Testnet',
-  nativeCurrency: { decimals: 18, name: 'Test Trust', symbol: 'tTRUST' },
-  rpcUrls: { default: { http: ['https://testnet.rpc.intuition.systems/http'] } },
-  blockExplorers: {
-    default: { name: 'Intuition Testnet Explorer', url: 'https://testnet.explorer.intuition.systems' }
-  },
-})
-
-// MultiVault contract addresses
-const MULTIVAULT_MAINNET = '0x6E35cF57A41fA15eA0EaE9C33e751b01A784Fe7e'
-const MULTIVAULT_TESTNET = '0x2Ece8D4dEdcB9918A398528f3fa4688b1d2CAB91'
-
-// ABI for calculateAtomId function
-const abi = parseAbi([
-  'function calculateAtomId(bytes data) pure returns (bytes32)',
-])
+import { calculateAtomId, calculateTripleId } from '@0xintuition/sdk'
 
 async function testCalculateAtomId() {
-  // Choose network (change to intuitionMainnet if desired)
-  const chain = intuitionTestnet
-  const multivaultAddress = MULTIVAULT_TESTNET
-
-  console.log(`🧪 Testing calculateAtomId on ${chain.name}`)
-  console.log(`📍 MultiVault: ${multivaultAddress}`)
+  console.log('🧪 Testing calculateAtomId using Intuition SDK')
+  console.log('📦 Package: @0xintuition/sdk v2.0.2')
+  console.log('🎯 Function: calculateAtomId (direct import)')
   console.log()
-
-  // Create client
-  const client = createPublicClient({
-    chain,
-    transport: http(),
-  })
 
   // Test cases
   const testCases = [
@@ -67,6 +27,18 @@ async function testCalculateAtomId() {
     {
       name: 'User Handle',
       data: '@alice'
+    },
+    {
+      name: 'Custom Label',
+      data: 'TypeScript Developer'
+    },
+    {
+      name: 'URL',
+      data: 'https://github.com/0xintuition/intuition-ts'
+    },
+    {
+      name: 'Email',
+      data: 'alice@example.com'
     }
   ]
 
@@ -74,20 +46,11 @@ async function testCalculateAtomId() {
 
   for (const testCase of testCases) {
     try {
-      // Convert string to hex bytes
-      const atomData = stringToHex(testCase.data)
-
-      // Call calculateAtomId
-      const atomId = await client.readContract({
-        address: multivaultAddress as `0x${string}`,
-        abi,
-        functionName: 'calculateAtomId',
-        args: [atomData],
-      })
+      // Use SDK's calculateAtomId function directly
+      const atomId = await calculateAtomId(testCase.data)
 
       console.log(`📋 ${testCase.name}:`)
       console.log(`   Input: "${testCase.data}"`)
-      console.log(`   Hex:   ${atomData}`)
       console.log(`   ID:    ${atomId}`)
       console.log()
     } catch (error) {
@@ -96,27 +59,62 @@ async function testCalculateAtomId() {
     }
   }
 
-  // Test duplicate calculation
+  // Test deterministic behavior
   console.log('🔄 Testing deterministic behavior (same input should give same ID):')
-  const sameData = stringToHex('test-atom')
+  const testData = 'test-atom-consistency'
 
-  const id1 = await client.readContract({
-    address: multivaultAddress as `0x${string}`,
-    abi,
-    functionName: 'calculateAtomId',
-    args: [sameData],
-  })
+  try {
+    const id1 = await calculateAtomId(testData)
+    const id2 = await calculateAtomId(testData)
 
-  const id2 = await client.readContract({
-    address: multivaultAddress as `0x${string}`,
-    abi,
-    functionName: 'calculateAtomId',
-    args: [sameData],
-  })
+    console.log(`Input: "${testData}"`)
+    console.log(`First call:  ${id1}`)
+    console.log(`Second call: ${id2}`)
+    console.log(`Match: ${id1 === id2 ? '✅' : '❌'}`)
+    console.log()
+  } catch (error) {
+    console.error('❌ Error testing deterministic behavior:', error)
+    console.log()
+  }
 
-  console.log(`First call:  ${id1}`)
-  console.log(`Second call: ${id2}`)
-  console.log(`Match: ${id1 === id2 ? '✅' : '❌'}`)
+  // Test with various atom data types
+  console.log('🛠️  Testing additional atom types:')
+
+  const additionalTests = [
+    { name: 'Numeric String', data: '12345' },
+    { name: 'Special Characters', data: 'hello@world#2024' },
+    { name: 'Unicode', data: '🚀 Space Mission' },
+    { name: 'JSON-like', data: '{"type": "concept", "value": "test"}' }
+  ]
+
+  for (const test of additionalTests) {
+    try {
+      const atomId = await calculateAtomId(test.data)
+      console.log(`✅ ${test.name}: "${test.data}" → ${atomId.slice(0, 10)}...`)
+    } catch (error) {
+      console.error(`❌ ${test.name}: Error with "${test.data}"`)
+    }
+  }
+
+  console.log()
+
+  // Bonus: Test calculateTripleId if available
+  console.log('🔗 Testing calculateTripleId (bonus):')
+  try {
+    // Create some test atoms first
+    const subjectId = await calculateAtomId('Alice')
+    const predicateId = await calculateAtomId('trusts')
+    const objectId = await calculateAtomId('Bob')
+
+    const tripleId = await calculateTripleId(subjectId, predicateId, objectId)
+
+    console.log(`Subject: "Alice" → ${subjectId}`)
+    console.log(`Predicate: "trusts" → ${predicateId}`)
+    console.log(`Object: "Bob" → ${objectId}`)
+    console.log(`Triple: (Alice, trusts, Bob) → ${tripleId}`)
+  } catch (error) {
+    console.error('❌ Error testing calculateTripleId:', error)
+  }
 }
 
 // Run the test
